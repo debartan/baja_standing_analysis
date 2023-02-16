@@ -19,13 +19,15 @@ data = data[1:]
 data = data.astype('float64')
 data = data.T
 
-
 car_number = 94
-f_window = 75
-f_order = 4
 
+# s-golay parameters
+f_window = 75
+f_order = 8
+
+# determining plot grid size pre-determined width
 width = 4
-size = len(event_names)
+size = len(event_names)-2 # skipping first two cols
 if size%width==0:
     height = size/width
 else:
@@ -33,8 +35,10 @@ else:
 
 
 for index, event in enumerate(event_names):
-    # sorting and filtering data for event
+    if index == 0 or index == 1:
+        continue; # want to skip first two data cols
 
+    # sorting and filtering data for event
     sort_y = np.sort(data[index])
     sort_y = sort_y[::-1]
     filt_y = signal.savgol_filter(sort_y,f_window,f_order)
@@ -45,12 +49,13 @@ for index, event in enumerate(event_names):
     event_pos = np.where(cars_sorted == car_number)
 
     # plotting
-    end = plt.subplot(width,height,index+1)
+    end = plt.subplot(height,width,index-1) # -1 to account for skipped
     end.plot(sort_y)
     end.plot(filt_y)
     end.axvline(x=event_pos[0], color="red")
     end.title.set_text(event)
 
+plt.subplots_adjust(wspace=0.5, hspace=0.5)
 plt.show()
 
 print("done")
